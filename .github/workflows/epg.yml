@@ -1,0 +1,77 @@
+# Generates a worldwide SPORTS XMLTV guide every day and publishes it to this repo's GitHub Pages,
+# so RajKumarTV can fetch it from a fixed public URL and refresh itself.
+#
+# One-time setup in this repo: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+# Then the guide is served at:
+#   https://<your-username>.github.io/RajKumarTV-epg/sports.xml.gz
+name: Build sports EPG
+
+on:
+  workflow_dispatch: # lets you run it on demand from the Actions tab
+  schedule:
+    - cron: '0 6 * * *' # every day at 06:00 UTC
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: epg
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build the worldwide sports channel list
+        run: node scripts/build-sports-channels.mjs "$GITHUB_WORKSPACE/sports.channels.xml"
+
+      - name: Get the iptv-org EPG grabber
+        run: git clone --depth 1 https://github.com/iptv-org/epg.git epg
+
+      - name: Install grabber dependencies
+        working-directory: epg
+        run: npm install
+
+      - name: Grab the guide (this is the long step)
+        working-directory: epg
+        run: >-
+          npm run grab ---
+          --channels="$GITHUB_WORKSPACE/sports.channels.xml"
+          --output="$GITHUB_WORKSPACE/site/sports.xml"
+          --days=2
+          --maxConnections=20
+          --gzip
+
+      - name: Finalise the published folder
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p site
+          [ -f site/sports.xml.gz ] || gzip -kf site/sports.xml
+          # A tiny landing page so the Pages root isn't a 404.
+          {
+            echo '<!doctype html><meta charset="utf-8"><title>RajKumarTV Sports EPG</title>'
+            echo '<h1>RajKumarTV Sports Guide Data</h1>'
+            echo "<p>Updated: $(date -u '+%Y-%m-%d %H:%M UTC')</p>"
+            echo '<p>Add this URL in RajKumarTV &rarr; Menu &rarr; Guide Data:</p>'
+            echo '<p><a href="sports.xml.gz">sports.xml.gz</a></p>'
+          } > site/index.html
+          ls -lh site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

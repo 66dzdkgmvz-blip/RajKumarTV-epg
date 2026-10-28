@@ -1,0 +1,6 @@
+node_modules/
+epg/
+site/
+sports.channels.xml
+*.xml.gz
+*.log
