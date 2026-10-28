@@ -22,10 +22,11 @@ const esc = (s) =>
 const SPORT_NAME =
   /\b(sports?|espn|fox ?sports?|sky ?sports?|bt ?sport|tnt ?sports?|bein|dazn|big ?ten|btn|sec ?network|acc ?network|pac-?12|longhorn|nba|nfl|nhl|mlb|mls|wnba|golf|tennis|willow|eurosport|supersport|ten ?sports?|star ?sports?|sony ?(sports?|ten)|sportsnet|\btsn\b|bally|fanduel|gol ?tv|premier ?sports?|viaplay ?sport|motogp|formula ?1|f1 ?tv|rugby|cricket|ufc|wwe|boxing|astro ?arena|elta ?sport|sport ?klub|nova ?sport|arena ?sport|match!|setanta|flosports|stadium|racing|speed)\b/i;
 
-// Preferred listing sites (reliable, mostly English), best first. Anything else falls back to the
-// channel's first available source.
+// Preferred listing sites, best first. tvguide.com and tvtv.us give rolling coverage from midnight
+// (so "now" is always covered); tvpassport.com only lists from ~6am local, leaving an overnight gap,
+// so it ranks below them. Anything unranked falls back to the channel's first available source.
 const SITE_RANK = [
-  'tvpassport.com', 'tvtv.us', 'tvguide.com', 'ontvtonight.com', 'sky.com', 'bein.com', 'dstv.com',
+  'tvguide.com', 'tvtv.us', 'ontvtonight.com', 'tvpassport.com', 'sky.com', 'bein.com', 'dstv.com',
   'startv.com.tr', 'gatotv.com', 'mi.tv', 'elcinema.com', 'tvprofil.com', 'programtv.onet.pl', 'm.tv.sms.cz',
 ];
 const rankOf = (site) => {
