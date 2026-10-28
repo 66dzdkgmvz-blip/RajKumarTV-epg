@@ -37,8 +37,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build the worldwide sports channel list
-        run: node scripts/build-sports-channels.mjs "$GITHUB_WORKSPACE/sports.channels.xml"
+      - name: Build the worldwide sports + news channel list
+        run: node scripts/build-channels.mjs "$GITHUB_WORKSPACE/channels.xml"
 
       - name: Get the iptv-org EPG grabber
         run: git clone --depth 1 https://github.com/iptv-org/epg.git epg
@@ -51,8 +51,8 @@ jobs:
         working-directory: epg
         run: >-
           npm run grab ---
-          --channels="$GITHUB_WORKSPACE/sports.channels.xml"
-          --output="$GITHUB_WORKSPACE/site/sports.xml"
+          --channels="$GITHUB_WORKSPACE/channels.xml"
+          --output="$GITHUB_WORKSPACE/site/guide.xml"
           --days=2
           --maxConnections=20
           --gzip
@@ -61,14 +61,16 @@ jobs:
         run: |
           cd "$GITHUB_WORKSPACE"
           mkdir -p site
-          [ -f site/sports.xml.gz ] || gzip -kf site/sports.xml
+          [ -f site/guide.xml.gz ] || gzip -kf site/guide.xml
+          # Keep sports.xml.gz as an alias so the original app URL keeps working.
+          cp -f site/guide.xml.gz site/sports.xml.gz
           # A tiny landing page so the Pages root isn't a 404.
           {
-            echo '<!doctype html><meta charset="utf-8"><title>RajKumarTV Sports EPG</title>'
-            echo '<h1>RajKumarTV Sports Guide Data</h1>'
+            echo '<!doctype html><meta charset="utf-8"><title>RajKumarTV Guide Data</title>'
+            echo '<h1>RajKumarTV Guide Data (sports + news, worldwide)</h1>'
             echo "<p>Updated: $(date -u '+%Y-%m-%d %H:%M UTC')</p>"
             echo '<p>Add this URL in RajKumarTV &rarr; Menu &rarr; Guide Data:</p>'
-            echo '<p><a href="sports.xml.gz">sports.xml.gz</a></p>'
+            echo '<p><a href="guide.xml.gz">guide.xml.gz</a> (sports.xml.gz still works as an alias)</p>'
           } > site/index.html
           ls -lh site
 
