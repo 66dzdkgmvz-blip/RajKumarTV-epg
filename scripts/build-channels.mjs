@@ -20,6 +20,14 @@ const esc = (s) =>
 
 const WANT_CATEGORIES = new Set(['sports', 'news']);
 
+// Major US broadcast networks, by exact channel id (the "network" field is inconsistent). Their local
+// affiliates in the playlist are tagged like "ABC.us@KAAL" (channel ABC.us, feed KAAL). Few affiliates
+// have a local guide, but the network schedule exists and matches every affiliate via the base channel
+// id — so the national line-up shows for all of them.
+const US_BROADCAST_IDS = new Set([
+  'ABC.us', 'NBC.us', 'CBS.us', 'Fox.us', 'TheCW.us', 'PBS.us', 'PBSKids.us', 'Telemundo.us', 'Univision.us', 'UniMas.us',
+]);
+
 // Names of sports channels whose category is missing or wrong.
 const SPORT_NAME =
   /\b(sports?|espn|fox ?sports?|sky ?sports?|bt ?sport|tnt ?sports?|bein|dazn|big ?ten|btn|sec ?network|acc ?network|pac-?12|longhorn|nba|nfl|nhl|mlb|mls|wnba|golf|tennis|willow|eurosport|supersport|ten ?sports?|star ?sports?|sony ?(sports?|ten)|sportsnet|\btsn\b|bally|fanduel|gol ?tv|premier ?sports?|viaplay ?sport|motogp|formula ?1|f1 ?tv|rugby|cricket|ufc|wwe|boxing|astro ?arena|elta ?sport|sport ?klub|nova ?sport|arena ?sport|match!|setanta|flosports|stadium|racing|speed)\b/i;
@@ -47,17 +55,19 @@ const [channels, guides] = await Promise.all([getJson('channels.json'), getJson(
 const wanted = new Map(); // id -> display name
 let nSports = 0;
 let nNews = 0;
+let nBroadcast = 0;
 for (const c of channels) {
   if (c.closed || c.is_nsfw) continue;
   const name = c.name || '';
   const cats = Array.isArray(c.categories) ? c.categories : [];
   const isSport = cats.includes('sports') || SPORT_NAME.test(name);
   const isNews = cats.includes('news') || NEWS_NAME.test(name);
-  if (!isSport && !isNews && !cats.some((x) => WANT_CATEGORIES.has(x))) continue;
-  if (!isSport && !isNews) continue;
+  const isBroadcast = US_BROADCAST_IDS.has(c.id);
+  if (!isSport && !isNews && !isBroadcast) continue;
   wanted.set(c.id, name || c.id);
   if (isSport) nSports++;
   if (isNews) nNews++;
+  if (isBroadcast) nBroadcast++;
 }
 
 // Best-ranked guide source per wanted channel.
@@ -78,7 +88,7 @@ lines.sort();
 
 const out = process.argv[2] || 'channels.xml';
 writeFileSync(out, `<?xml version="1.0" encoding="UTF-8"?>\n<channels>\n${lines.join('\n')}\n</channels>\n`);
-console.log(`Sports + news channels found: ${wanted.size}  (sports≈${nSports}, news≈${nNews})`);
+console.log(`Channels wanted: ${wanted.size}  (sports≈${nSports}, news≈${nNews}, US broadcast≈${nBroadcast})`);
 console.log(`With a public guide source:   ${byChannel.size}  (these will be grabbed)`);
 console.log(`Without any guide source:     ${wanted.size - byChannel.size}  (no listings exist anywhere)`);
 console.log(`Wrote ${out}`);

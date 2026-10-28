@@ -29,6 +29,9 @@ repo, and TV listings aren't sensitive. It contains no app source code and no pr
 
 - Every **sports** and **news** channel in the IPTV-org database (US and international) that has a
   public listings source — about 1,700 of ~4,700.
+- The major **US broadcast networks** (ABC, NBC, CBS, Fox, The CW, PBS, Telemundo, Univision). Their
+  local affiliates (e.g. `ABC.us@KAAL`) match the network's national schedule by base channel id, so
+  the affiliate shows ABC's line-up — not its local news, which isn't published anywhere.
 - Channels with no listings anywhere can't be covered by any guide — that's a limit of the data.
 - Schedules are scraped from public TV-guide websites by the [iptv-org/epg](https://github.com/iptv-org/epg)
   project; this repo selects the channels and runs it on a schedule.
