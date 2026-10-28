@@ -1,6 +1,6 @@
-# RajKumarTV Guide Data (sports + news)
+# RajKumarTV Guide Data (sports + news + kids)
 
-Generates a **worldwide sports and news** XMLTV guide once a day and publishes it to a public URL
+Generates a **worldwide sports, news and kids** XMLTV guide once a day and publishes it to a public URL
 that RajKumarTV can read. The guide uses the same channel IDs as the IPTV-org playlist, so channels
 match automatically — no hand-mapping.
 
@@ -27,8 +27,9 @@ repo, and TV listings aren't sensitive. It contains no app source code and no pr
 
 ## What it covers
 
-- Every **sports** and **news** channel in the IPTV-org database (US and international) that has a
-  public listings source — about 1,700 of ~4,700.
+- Every **sports**, **news** and **kids** channel in the IPTV-org database (US and international) that
+  has a public listings source. Kids coverage includes the major children's networks — Disney (Channel,
+  Junior, XD), Nickelodeon, Nick Jr, Nicktoons, TeenNick, Cartoon Network, Boomerang and more.
 - The major **US broadcast networks** (ABC, NBC, CBS, Fox, The CW, PBS, Telemundo, Univision). Their
   local affiliates (e.g. `ABC.us@KAAL`) match the network's national schedule by base channel id, so
   the affiliate shows ABC's line-up — not its local news, which isn't published anywhere.
@@ -38,8 +39,8 @@ repo, and TV listings aren't sensitive. It contains no app source code and no pr
 
 ## Tuning
 
-- **Which channels:** `scripts/build-channels.mjs` selects channels whose category is sports/news or
-  whose name matches sports/news keywords. Edit the keyword lists or categories to add more.
+- **Which channels:** `scripts/build-channels.mjs` selects channels whose category is sports/news/kids
+  or whose name matches sports/news/kids keywords. Edit the keyword lists or categories to add more.
 - **How many days ahead:** change `--days` in `.github/workflows/epg.yml` (default 2).
 - **Source quality:** `SITE_RANK` in the script prefers listing sites with rolling, current-time
   coverage (tvguide.com, tvtv.us) over ones with overnight gaps (tvpassport.com).
